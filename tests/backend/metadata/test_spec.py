@@ -229,6 +229,34 @@ Requires-Dist: baz @ file:///path/to/project ; extra == 'feature3'
             },
         }
 
+    def test_dependencies_extra_marker_positions(self):
+        core_metadata = f"""\
+Metadata-Version: {LATEST_METADATA_VERSION}
+Name: My.App
+Version: 0.1.0
+Provides-Extra: dev
+Requires-Dist: tomli>=2.0 ; extra == "dev" and ( python_version < '3.11')
+Requires-Dist: typing-extensions; extra == "dev" and (python_version < '3.11' or sys_platform == 'win32')
+Provides-Extra: win
+Requires-Dist: pywin32>=306; extra == "win" and sys_platform == 'win32' and python_version >= '3.10'
+Requires-Dist: colorama; sys_platform == 'win32' and extra == "win" and python_version >= '3.10'
+"""
+        assert project_metadata_from_core_metadata(core_metadata) == {
+            "name": "My.App",
+            "version": "0.1.0",
+            "dependencies": [],
+            "optional-dependencies": {
+                "dev": [
+                    'tomli>=2.0; python_version < "3.11"',
+                    'typing-extensions; python_version < "3.11" or sys_platform == "win32"',
+                ],
+                "win": [
+                    'pywin32>=306; sys_platform == "win32" and python_version >= "3.10"',
+                    'colorama; sys_platform == "win32" and python_version >= "3.10"',
+                ],
+            },
+        }
+
     def test_import_names_and_import_namespaces(self):
         core_metadata = f"""\
 Metadata-Version: {LATEST_METADATA_VERSION}
